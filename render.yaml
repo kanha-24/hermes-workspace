@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: hermes-discord
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: API_SERVER_ENABLED
+        value: "true"
+      - key: API_SERVER_HOST
+        value: "0.0.0.0"
+      - key: API_SERVER_PORT
+        value: "10000"
+      - key: API_SERVER_KEY
+        generateValue: true
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_ALLOWED_USERS
+        sync: false
+      - key: DISCORD_REQUIRE_MENTION
+        value: "true"
