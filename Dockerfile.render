@@ -1,15 +1,17 @@
 # Render deployment for a Hermes Agent Discord gateway.
-# Render Web Services require an HTTP listener on the PORT environment variable.
+# Render Web Services require an HTTP listener on PORT.
 FROM nousresearch/hermes-agent:latest
 
-# Render uses PORT=10000 by default for Web Services.
-# Hermes exposes its OpenAI-compatible API server on the same port so Render
-# can detect the service as healthy while Discord continues through the gateway.
+# Hermes API server is useful for the workspace/gateway integration.
+# Render's default Web Service port is 10000.
 ENV API_SERVER_ENABLED=true
 ENV API_SERVER_HOST=0.0.0.0
 ENV API_SERVER_PORT=10000
 
 EXPOSE 10000
 
-# Run the Discord/messaging gateway in the foreground.
-CMD ["gateway", "run"]
+# Keep a lightweight HTTP listener alive for Render's Web Service health
+# detection while Hermes runs its Discord gateway under the image supervisor.
+# The listener does not expose Hermes functionality; it only satisfies Render's
+# required port binding.
+CMD ["sh", "-c", "python3 -m http.server ${PORT:-10000} --bind 0.0.0.0 >/tmp/render-health.log 2>&1 & exec gateway run"]
